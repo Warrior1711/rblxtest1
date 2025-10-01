@@ -2,20 +2,20 @@
 <html>
   <head>
     <title>Roblox Limiteds Trading Simulator</title>
-    <style>
-      body { font-family: sans-serif; background: #f4f4f4; margin: 2em; }
-      #leaderboard, #inventory, #items { background: #fff; margin-bottom: 1em; padding:1em; border-radius:8px; }
-      button { margin:0.2em; }
-      th, td { padding:0.2em 0.5em; }
-    </style>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <h1>Roblox Limiteds Trading Simulator</h1>
-    <button id="start">Start Game</button>
-    <button id="stop">Stop Game</button>
-    <div id="leaderboard"></div>
-    <div id="inventory"></div>
-    <div id="items"></div>
+    <div style="text-align:center; margin-bottom:2em;">
+      <button id="start">Start Game</button>
+      <button id="stop">Stop Game</button>
+      <span id="next-drop-timer" style="margin-left:2em; color:#3b4252;"></span>
+    </div>
+    <div id="main-container">
+      <div class="panel" id="leaderboard"></div>
+      <div class="panel" id="inventory"></div>
+      <div class="panel" id="items"></div>
+    </div>
     <script type="module">
       import { setupUI } from './ui.js';
       setupUI();
