@@ -1,4 +1,4 @@
-// Roblox Limiteds - Main Game Simulation Logic
+// Roblox Limiteds - Main Game Simulation Logic (with random drop times)
 
 import { items } from './items.js';
 import { bots, getBotTradePrice, botShouldTrade } from './bots.js';
@@ -30,19 +30,63 @@ function updateLeaderboard() {
 }
 
 let round = 0;
-let interval = null;
-const roundInterval = 30000; // 30s, adjust as needed
+let timeout = null;
+let nextDropTimeoutMs = 0;
+let dropTimerInterval = null;
+let uiUpdate = null;
+export let nextDropSeconds = 0;
+
+function getRandomDropInterval() {
+  // 30s to 60s in ms
+  return 30000 + Math.floor(Math.random() * 30001);
+}
+
+function updateDropTimerUI() {
+  if (typeof document === "undefined") return;
+  const el = document.getElementById('next-drop-timer');
+  if (!el) return;
+  if (nextDropSeconds > 0) {
+    el.textContent = `Next item drop in: ${nextDropSeconds}s`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function startDropTimerCountdown(ms) {
+  nextDropSeconds = Math.round(ms / 1000);
+  updateDropTimerUI();
+  if (dropTimerInterval) clearInterval(dropTimerInterval);
+  dropTimerInterval = setInterval(() => {
+    nextDropSeconds--;
+    updateDropTimerUI();
+    if (nextDropSeconds <= 0) {
+      clearInterval(dropTimerInterval);
+    }
+  }, 1000);
+}
 
 export function startGame(uiUpdateCallback) {
   round = 0;
-  interval = setInterval(() => {
-    round++;
-    dropNewItem();
-    botsTrade();
-    expireCirculation();
-    updateLeaderboard();
-    if (uiUpdateCallback) uiUpdateCallback();
-  }, roundInterval);
+  if (timeout) clearTimeout(timeout);
+  if (dropTimerInterval) clearInterval(dropTimerInterval);
+  uiUpdate = uiUpdateCallback;
+  scheduleNextRound();
+}
+
+function scheduleNextRound() {
+  nextDropTimeoutMs = getRandomDropInterval();
+  startDropTimerCountdown(nextDropTimeoutMs);
+  timeout = setTimeout(runRound, nextDropTimeoutMs);
+}
+
+function runRound() {
+  round++;
+  dropNewItem();
+  botsTrade();
+  expireCirculation();
+  updateLeaderboard();
+  if (uiUpdate) uiUpdate();
+  scheduleNextRound();
 }
 
 function dropNewItem() {
@@ -138,6 +182,12 @@ export function playerSell(itemId, customPrice) {
   }
 }
 
+export function stopGame() {
+  if (timeout) clearTimeout(timeout);
+  if (dropTimerInterval) clearInterval(dropTimerInterval);
+  nextDropSeconds = 0;
+  updateDropTimerUI();
+}
 export function stopGame() {
   clearInterval(interval);
 }
