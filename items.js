@@ -72,7 +72,7 @@ export const items = [
     startingRAP: 250,
     rap: 2222,
     salesVolume: [],
-    stock: 2,
+    stock: 9,
     maxStock: 16,
     tags: ['demand'],
     image: 'sinister_p.png',
